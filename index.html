@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SivaStudio | Ultra Pro Multi-Ratio Designer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Galada&family=Hind+Siliguri:wght@400;700&family=Montserrat:wght@400;700;900&family=Noto+Serif+Bengali:wght@400;700&family=Playfair+Display:wght@700;900&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js" type="text/javascript"></script>
+<script type="text/javascript" language="javascript"> 
+    $(function () { $(this).bind("contextmenu", function (e) { e.preventDefault(); }); }); 
+</script>
+<script>
+    document.onkeydown = function(e) {
+        if (e.ctrlKey && (e.keyCode === 85 )) {
+            return false;
+        }
+    };
+</script>
+    
+    <style>
+        :root {
+            --primary: #E60023;
+            --bg-app: #0f0f0f;
+            --bg-card: #1a1a1a;
+            --text-main: #d1d1d1;
+            --border: #333;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', 'Hind Siliguri', sans-serif; }
+        body { background-color: var(--bg-app); color: var(--text-main); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+        header {
+            background: #000; padding: 8px 15px; display: flex; justify-content: space-between;
+            align-items: center; border-bottom: 1px solid var(--border); height: 50px;
+        }
+
+        .logo { font-weight: 700; color: var(--primary); font-size: 1rem; }
+
+        main { display: grid; grid-template-columns: 290px 1fr 290px; height: calc(100vh - 50px); overflow: hidden; }
+
+        .sidebar { background: var(--bg-card); overflow-y: auto; padding: 12px; border-right: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; }
+        .sidebar-right { border-right: none; border-left: 1px solid var(--border); }
+
+        .section-title {
+            font-size: 0.65rem; font-weight: 800; text-transform: uppercase; color: var(--primary);
+            border-bottom: 1px solid #333; padding-bottom: 4px; margin-bottom: 5px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .control-group { background: #222; border: 1px solid #333; padding: 10px; border-radius: 6px; margin-bottom: 5px; }
+        label { font-size: 0.55rem; color: #777; text-transform: uppercase; margin-bottom: 3px; display: block; }
+        
+        input[type="text"], select {
+            width: 100%; padding: 6px; border: 1px solid #444; background: #111; color: #fff;
+            border-radius: 4px; font-size: 0.75rem; margin-bottom: 6px;
+        }
+
+        .slider-box { display: flex; flex-direction: column; margin-bottom: 5px; }
+        .slider-box span { font-size: 0.55rem; color: #666; display: flex; justify-content: space-between; }
+
+        input[type="range"] { accent-color: var(--primary); height: 3px; cursor: pointer; width: 100%; margin: 4px 0;}
+
+        .canvas-container { 
+            display: flex; align-items: center; justify-content: center; padding: 15px; 
+            background: #0a0a0a; overflow: hidden; position: relative; 
+        }
+        
+        #pin-canvas { 
+            max-width: 100%; max-height: 100%; object-fit: contain; 
+            background: #fff; box-shadow: 0 0 30px rgba(0,0,0,0.5); 
+            touch-action: none;
+        }
+
+        .btn { padding: 6px 10px; border-radius: 4px; font-weight: 600; cursor: pointer; border: none; font-size: 0.7rem; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-outline { background: transparent; border: 1px solid #555; color: #ccc; }
+        .btn-danger { background: #442222; color: #ff8888; font-size: 0.55rem; padding: 2px 5px; }
+
+        .para-item { border-left: 2px solid var(--primary); padding-left: 8px; margin-bottom: 8px; background: rgba(0,0,0,0.2); padding: 6px; }
+        .align-btns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-top: 5px; }
+        .align-btn { background: #333; border: 1px solid #444; color: #fff; font-size: 0.6rem; padding: 3px; cursor: pointer; border-radius: 3px; }
+        .align-btn.active { background: var(--primary); border-color: var(--primary); }
+
+        .color-dot { width: 100%; height: 20px; border-radius: 3px; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #444; border-radius: 10px; }
+    
+@media (max-width:900px){
+    body{height:auto;overflow:auto;}
+    header{height:auto;flex-wrap:wrap;gap:8px;padding:10px}
+    main{display:flex;flex-direction:column;height:auto;overflow:visible}
+    .canvas-container{order:1;min-height:50vh;padding:10px; position: sticky; top: 0; z-index: 100; background: #000;}
+    .sidebar,.sidebar-right{ order:2; width:100%; border:none; max-height:none; overflow:visible;}
+    #pin-canvas{width:100%;height:auto;max-height:65vh}
+}
+</style>
+</head>
+<body>
+<BODY oncontextmenu="return false" onselectstart="return false" ondragstart="return false">
+    <header>
+        <div class="logo">SivaStudio <span style="opacity: 0.5; font-size: 0.7rem; margin-left: 10px;">ULTRA DESIGNER</span></div>
+        <div>
+            <button class="btn btn-outline" onclick="document.getElementById('file-input').click()">Upload BG</button>
+            <button class="btn btn-primary" onclick="exportPin()">Download</button>
+        </div>
+    </header>
+
+    <main>
+        <aside class="sidebar">
+            <div class="section-title">Canvas Ratio</div>
+            <div class="control-group">
+                <select id="ratio-select" onchange="changeAspectRatio(this.value)">
+                    <option value="9:16">Story (9:16)</option>
+                    <option value="1:1">Square (1:1)</option>
+                    <option value="4:5">Portrait (4:5)</option>
+                    <option value="3:4">Standard (3:4)</option>
+                </select>
+            </div>
+
+            <div class="section-title">Headline</div>
+            <div class="control-group">
+                <input type="text" value="সাফল্যের মূলমন্ত্র" oninput="updateState('headline', this.value)">
+                <div class="slider-box"><span>Size</span><input type="range" min="30" max="250" value="110" oninput="updateState('headlineSize', parseInt(this.value))"></div>
+                <div class="slider-box"><span>Width</span><input type="range" min="100" max="1000" value="950" oninput="updateState('headlineW', parseInt(this.value))"></div>
+            </div>
+
+            <div class="section-title">Paragraphs <button class="btn-primary" style="font-size: 0.5rem; padding: 1px 5px;" onclick="addParagraph()">+ ADD</button></div>
+            <div id="paragraphs-container"></div>
+
+            <div class="section-title">Branding</div>
+            <div class="control-group">
+                <input type="text" value="WWW.YOURWEBSITE.COM" oninput="updateState('brand', this.value)">
+                <div class="slider-box"><span>Font Size</span><input type="range" min="10" max="80" value="35" oninput="updateState('brandSize', parseInt(this.value))"></div>
+            </div>
+        </aside>
+
+        <div class="canvas-container">
+            <canvas id="pin-canvas" width="1080" height="1920"></canvas>
+            <input type="file" id="file-input" hidden accept="image/*" onchange="handleImageUpload(event)">
+        </div>
+
+        <aside class="sidebar sidebar-right">
+            <div class="section-title">Alignment Guides</div>
+            <div class="control-group">
+                <label style="display:flex;align-items:center;gap:8px;text-transform:none;margin-bottom:5px; cursor:pointer;">
+                    <input type="checkbox" onchange="updateGuide('vActive', this.checked)"> Enable Vertical Guide (Cyan)
+                </label>
+                <label style="display:flex;align-items:center;gap:8px;text-transform:none;margin-bottom:5px; cursor:pointer;">
+                    <input type="checkbox" onchange="updateGuide('hActive', this.checked)"> Enable Horizontal Guide (Cyan)
+                </label>
+                <label style="display:flex;align-items:center;gap:8px;text-transform:none;color:#ff5555;margin-bottom:5px; cursor:pointer;">
+                    <input type="checkbox" onchange="updateState('headerMarkerActive', this.checked)"> Header Center Marker (+)
+                </label>
+                <label style="display:flex;align-items:center;gap:8px;text-transform:none;color:#ff5555; cursor:pointer;">
+                    <input type="checkbox" onchange="updateState('footerMarkerActive', this.checked)"> Footer Center Marker (+)
+                </label>
+            </div>
+
+            <div class="section-title">Logo Branding</div>
+            <div class="control-group">
+                <button class="btn btn-outline" style="width:100%; margin-bottom:8px;" onclick="document.getElementById('logo-input').click()">Upload Logo</button>
+                <input type="file" id="logo-input" hidden accept="image/*" onchange="handleLogoUpload(event)">
+                <div class="slider-box"><span>Size</span><input type="range" min="20" max="600" value="150" oninput="updateState('logoW', parseInt(this.value))"></div>
+                <label style="display:flex;align-items:center;gap:5px;"><input type="checkbox" onchange="updateState('logoRound', this.checked)"> Round Mask</label>
+            </div>
+
+            <div class="section-title">Overlay Banners</div>
+            <div class="control-group">
+                <label><input type="checkbox" checked onchange="toggleBanner('header', this.checked)"> Header Banner</label>
+                <div class="slider-box">
+                    <input type="range" min="0" max="600" value="200" oninput="updateBanner('header', 'h', parseInt(this.value))">
+                    <input type="range" min="0" max="100" value="100" oninput="updateBanner('header', 'opacity', this.value/100)">
+                </div>
+
+                <label style="margin-top:8px;"><input type="checkbox" checked onchange="toggleBanner('middle', this.checked)"> Middle Banner</label>
+                <div class="slider-box"><span>Height</span><input type="range" min="10" max="1200" value="500" oninput="updateBanner('middle', 'h', parseInt(this.value))"></div>
+                <div class="slider-box"><span>Width</span><input type="range" min="0" max="1080" value="980" oninput="updateBanner('middle', 'w', parseInt(this.value))"></div>
+                <div class="slider-box"><span>Opacity</span><input type="range" min="0" max="100" value="100" oninput="updateBanner('middle', 'opacity', this.value/100)"></div>
+
+                <label style="margin-top:8px;"><input type="checkbox" checked onchange="toggleBanner('footer', this.checked)"> Footer Banner</label>
+                <div class="slider-box">
+                    <input type="range" min="0" max="600" value="180" oninput="updateBanner('footer', 'h', parseInt(this.value))">
+                    <input type="range" min="0" max="100" value="100" oninput="updateBanner('footer', 'opacity', this.value/100)">
+                </div>
+            </div>
+
+            <div class="section-title">Global Look</div>
+            <div class="control-group">
+                <select onchange="updateState('fontFamily', this.value)">
+                    <option value="Hind Siliguri">Hind Siliguri</option>
+                    <option value="Galada">Galada</option>
+                    <option value="Noto Serif Bengali">Noto Serif</option>
+                    <option value="Poppins">Poppins</option>
+                </select>
+                <div id="color-palette" style="display:grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin-top:5px;"></div>
+                <div class="slider-box" style="margin-top:10px;">
+                    <span>Background Dim</span>
+                    <input type="range" min="0" max="100" value="40" oninput="updateState('overlayOpacity', this.value/100)">
+                </div>
+                <input type="color" value="#ffffff" oninput="updateState('textColor', this.value)" style="width:100%; height:25px; border:none; background:none; cursor:pointer; margin-top:5px;">
+            </div>
+        </aside>
+    </main>
+
+    <script>
+        let state = {
+            canvasW: 1080, canvasH: 1920,
+            headline: "সাফল্যের মূলমন্ত্র", headlineX: 540, headlineY: 650, headlineSize: 110, headlineW: 950,
+            brand: "WWW.YOURWEBSITE.COM", brandX: 540, brandY: 1820, brandSize: 35,
+            paragraphs: [{ id: Date.now(), text: "আপনার লক্ষ্যকে স্থির রাখুন এবং নিয়মিত কাজ করুন।", x: 540, y: 1000, size: 45, align: 'center', w: 900 }],
+            banners: {
+                header: { active: true, h: 200, opacity: 1.0 },
+                middle: { active: true, x: 540, y: 950, w: 980, h: 500, opacity: 1.0 },
+                footer: { active: true, h: 180, opacity: 1.0 }
+            },
+            guides: { vActive: false, vPos: 540, hActive: false, hPos: 960 },
+            headerMarkerActive: false,
+            footerMarkerActive: false,
+            accentColor: '#E60023', textColor: '#ffffff', overlayOpacity: 0.4,
+            fontFamily: 'Hind Siliguri', bgImage: null,
+            logoImage: null, logoX: 540, logoY: 220, logoW: 150, logoRound: false
+        };
+
+        const canvas = document.getElementById('pin-canvas');
+        const ctx = canvas.getContext('2d');
+        let dragTarget = null, startX, startY, hitZones = [], showVGuide = false, showHGuide = false;
+
+        const COLORS = ['#E60023', '#000000', '#2D3436', '#0984E3', '#00B894', '#6C5CE7', '#FDCB6E', '#FF7675', '#ffffff', '#111111'];
+
+        window.onload = () => { initUI(); initDragEvents(); render(); };
+
+        function initUI() {
+            const palette = document.getElementById('color-palette');
+            COLORS.forEach(c => {
+                const d = document.createElement('div');
+                d.className = 'color-dot'; d.style.backgroundColor = c;
+                d.onclick = () => updateState('accentColor', c);
+                palette.appendChild(d);
+            });
+            renderParagraphControls();
+        }
+
+        function changeAspectRatio(ratio) {
+            const oldH = state.canvasH;
+            if (ratio === '9:16') { state.canvasW = 1080; state.canvasH = 1920; }
+            else if (ratio === '1:1') { state.canvasW = 1080; state.canvasH = 1080; }
+            else if (ratio === '4:5') { state.canvasW = 1080; state.canvasH = 1350; }
+            else if (ratio === '3:4') { state.canvasW = 1080; state.canvasH = 1440; }
+            const scale = state.canvasH / oldH;
+            state.headlineY *= scale; state.brandY *= scale; state.logoY *= scale;
+            state.banners.middle.y *= scale; state.paragraphs.forEach(p => p.y *= scale);
+            state.guides.hPos *= scale;
+            render();
+        }
+
+        function updateState(key, val) { state[key] = val; render(); }
+        function updateGuide(key, val) { state.guides[key] = val; render(); }
+        function toggleBanner(type, val) { state.banners[type].active = val; render(); }
+        function updateBanner(type, prop, val) { state.banners[type][prop] = val; render(); }
+
+        function renderParagraphControls() {
+            const container = document.getElementById('paragraphs-container');
+            container.innerHTML = '';
+            state.paragraphs.forEach(p => {
+                const div = document.createElement('div');
+                div.className = 'para-item';
+                div.innerHTML = `
+                    <div style="display:flex;gap:5px;margin-bottom:5px">
+                        <input type="text" value="${p.text}" oninput="updatePara(${p.id}, 'text', this.value)" style="margin:0">
+                        <button class="btn-danger" onclick="removeParagraph(${p.id})">✕</button>
+                    </div>
+                    <div class="slider-box"><span>Size</span><input type="range" min="10" max="150" value="${p.size}" oninput="updatePara(${p.id}, 'size', parseInt(this.value))"></div>
+                    <div class="align-btns">
+                        <button class="align-btn ${p.align==='left'?'active':''}" onclick="updatePara(${p.id}, 'align', 'left')">L</button>
+                        <button class="align-btn ${p.align==='center'?'active':''}" onclick="updatePara(${p.id}, 'align', 'center')">C</button>
+                        <button class="align-btn ${p.align==='right'?'active':''}" onclick="updatePara(${p.id}, 'align', 'right')">R</button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function addParagraph() {
+            state.paragraphs.push({ id: Date.now(), text: "নতুন লাইন...", x: 540, y: state.canvasH/2, size: 40, align: 'center', w: 900 });
+            renderParagraphControls(); render();
+        }
+
+        function removeParagraph(id) {
+            state.paragraphs = state.paragraphs.filter(p => p.id !== id);
+            renderParagraphControls(); render();
+        }
+
+        function updatePara(id, key, val) {
+            const p = state.paragraphs.find(p => p.id === id);
+            if(p) p[key] = val; render();
+        }
+
+        function render() {
+            const w = state.canvasW, h = state.canvasH;
+            canvas.width = w; canvas.height = h;
+            ctx.clearRect(0, 0, w, h);
+            hitZones = [];
+
+            if (state.bgImage) drawImageCover(state.bgImage, 0, 0, w, h);
+            else { ctx.fillStyle = '#1a1a1a'; ctx.fillRect(0,0,w,h); }
+
+            ctx.fillStyle = `rgba(0,0,0,${state.overlayOpacity})`;
+            ctx.fillRect(0, 0, w, h);
+
+            // Banners
+            if (state.banners.header.active) {
+                ctx.save(); ctx.globalAlpha = state.banners.header.opacity;
+                ctx.fillStyle = state.accentColor; ctx.fillRect(0, 0, w, state.banners.header.h);
+                ctx.restore();
+            }
+            if (state.banners.footer.active) {
+                ctx.save(); ctx.globalAlpha = state.banners.footer.opacity;
+                ctx.fillStyle = state.accentColor; ctx.fillRect(0, h - state.banners.footer.h, w, state.banners.footer.h);
+                ctx.restore();
+            }
+            if (state.banners.middle.active) {
+                const b = state.banners.middle;
+                ctx.save(); ctx.globalAlpha = b.opacity; ctx.fillStyle = state.accentColor;
+                const bx = b.x - b.w / 2, by = b.y - b.h / 2;
+                ctx.fillRect(bx, by, b.w, b.h);
+                ctx.restore();
+                hitZones.push({ id: `banner-middle`, x: bx, y: by, w: b.w, h: b.h });
+            }
+
+            // Header & Footer Markers
+            ctx.strokeStyle = '#ff3333'; ctx.lineWidth = 3;
+            if (state.headerMarkerActive) {
+                ctx.beginPath();
+                const mx = w/2, my = state.banners.header.h / 2;
+                ctx.moveTo(mx, my - 30); ctx.lineTo(mx, my + 30);
+                ctx.moveTo(mx - 30, my); ctx.lineTo(mx + 30, my);
+                ctx.stroke();
+            }
+            if (state.footerMarkerActive) {
+                ctx.beginPath();
+                const mx = w/2, my = h - (state.banners.footer.h / 2);
+                ctx.moveTo(mx, my - 30); ctx.lineTo(mx, my + 30);
+                ctx.moveTo(mx - 30, my); ctx.lineTo(mx + 30, my);
+                ctx.stroke();
+            }
+
+            // Logo
+            if (state.logoImage) {
+                const aspect = state.logoImage.height / state.logoImage.width;
+                const logoH = state.logoW * aspect;
+                const lx = state.logoX - state.logoW / 2, ly = state.logoY - logoH / 2;
+                ctx.save();
+                if(state.logoRound) { ctx.beginPath(); ctx.arc(state.logoX, state.logoY, state.logoW / 2, 0, Math.PI * 2); ctx.clip(); }
+                ctx.drawImage(state.logoImage, lx, ly, state.logoW, logoH);
+                ctx.restore();
+                hitZones.push({ id: 'logo', x: lx, y: ly, w: state.logoW, h: logoH });
+            }
+
+            // SNAP GUIDES (White dashed)
+            if (showVGuide) { ctx.setLineDash([15,15]); ctx.strokeStyle = 'rgba(255,255,255,0.6)'; ctx.beginPath(); ctx.moveTo(w/2, 0); ctx.lineTo(w/2, h); ctx.stroke(); ctx.setLineDash([]); }
+            if (showHGuide) { ctx.setLineDash([15,15]); ctx.strokeStyle = 'rgba(255,255,255,0.6)'; ctx.beginPath(); ctx.moveTo(0, h/2); ctx.lineTo(w, h/2); ctx.stroke(); ctx.setLineDash([]); }
+
+            // MANUAL GUIDES (Cyan)
+            if (state.guides.vActive) {
+                ctx.strokeStyle = '#00ffff'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(state.guides.vPos, 0); ctx.lineTo(state.guides.vPos, h); ctx.stroke();
+                hitZones.push({ id: 'guide-v', x: state.guides.vPos - 25, y: 0, w: 50, h: h });
+            }
+            if (state.guides.hActive) {
+                ctx.strokeStyle = '#00ffff'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(0, state.guides.hPos); ctx.lineTo(w, state.guides.hPos); ctx.stroke();
+                hitZones.push({ id: 'guide-h', x: 0, y: state.guides.hPos - 25, w: w, h: 50 });
+            }
+
+            // TEXT ELEMENTS
+            ctx.fillStyle = state.textColor; ctx.textBaseline = 'middle';
+            ctx.textAlign = 'center'; ctx.font = `900 ${state.headlineSize}px '${state.fontFamily}'`;
+            hitZones.push({ id: 'headline', ...wrapText(ctx, state.headline, state.headlineX, state.headlineY, state.headlineW, state.headlineSize*1.2, 'center') });
+
+            state.paragraphs.forEach(p => {
+                ctx.textAlign = p.align; ctx.font = `400 ${p.size}px '${state.fontFamily}'`;
+                hitZones.push({ id: `para-${p.id}`, ...wrapText(ctx, p.text, p.x, p.y, p.w, p.size*1.4, p.align) });
+            });
+
+            ctx.textAlign = 'center'; ctx.font = `700 ${state.brandSize}px '${state.fontFamily}'`;
+            hitZones.push({ id: 'brand', ...wrapText(ctx, state.brand, state.brandX, state.brandY, 1000, state.brandSize*1.2, 'center') });
+        }
+
+        function wrapText(ctx, text, x, y, maxWidth, lineHeight, align) {
+            const words = text.split(' '), lines = []; let line = '';
+            for (let n = 0; n < words.length; n++) {
+                let testLine = line + words[n] + ' ';
+                if (ctx.measureText(testLine).width > maxWidth && n > 0) { lines.push(line); line = words[n] + ' '; }
+                else line = testLine;
+            }
+            lines.push(line);
+            let startY = y - ((lines.length - 1) * lineHeight) / 2;
+            const initialY = startY;
+            lines.forEach(l => {
+                let drawX = x;
+                if(align === 'left') drawX = x - maxWidth/2;
+                if(align === 'right') drawX = x + maxWidth/2;
+                ctx.fillText(l, drawX, startY);
+                startY += lineHeight;
+            });
+            return { x: x - maxWidth/2, y: initialY - lineHeight/2, w: maxWidth, h: lines.length * lineHeight };
+        }
+
+        function initDragEvents() {
+            const startEvent = (e) => {
+                const pos = getPointerPos(e);
+                for (let i = hitZones.length - 1; i >= 0; i--) {
+                    const zone = hitZones[i];
+                    if (pos.x >= zone.x && pos.x <= zone.x + zone.w && pos.y >= zone.y && pos.y <= zone.y + zone.h) {
+                        dragTarget = zone;
+                        if (zone.id === 'guide-v') startX = pos.x - state.guides.vPos;
+                        else if (zone.id === 'guide-h') startY = pos.y - state.guides.hPos;
+                        else if (zone.id === 'banner-middle') { startX = pos.x - state.banners.middle.x; startY = pos.y - state.banners.middle.y; }
+                        else if (zone.id.startsWith('para-')) { const p = state.paragraphs.find(para => `para-${para.id}` === zone.id); startX = pos.x - p.x; startY = pos.y - p.y; }
+                        else if (zone.id === 'logo') { startX = pos.x - state.logoX; startY = pos.y - state.logoY; }
+                        else { startX = pos.x - state[zone.id + 'X']; startY = pos.y - state[zone.id + 'Y']; }
+                        if(e.cancelable) e.preventDefault();
+                        return;
+                    }
+                }
+            };
+
+            const moveEvent = (e) => {
+                if (!dragTarget) return;
+                const pos = getPointerPos(e);
+                let newX = Math.round(pos.x - startX), newY = Math.round(pos.y - startY);
+
+                if (dragTarget.id === 'guide-v') state.guides.vPos = newX;
+                else if (dragTarget.id === 'guide-h') state.guides.hPos = newY;
+                else {
+                    const centerX = state.canvasW / 2, centerY = state.canvasH / 2;
+                    showVGuide = Math.abs(newX - centerX) < 25; if(showVGuide) newX = centerX;
+                    showHGuide = Math.abs(newY - centerY) < 25; if(showHGuide) newY = centerY;
+                    if (dragTarget.id === 'banner-middle') { state.banners.middle.x = newX; state.banners.middle.y = newY; }
+                    else if (dragTarget.id.startsWith('para-')) { const p = state.paragraphs.find(para => `para-${para.id}` === dragTarget.id); p.x = newX; p.y = newY; }
+                    else if (dragTarget.id === 'logo') { state.logoX = newX; state.logoY = newY; }
+                    else { state[dragTarget.id + 'X'] = newX; state[dragTarget.id + 'Y'] = newY; }
+                }
+                if(e.cancelable) e.preventDefault();
+                render();
+            };
+
+            const endEvent = () => { dragTarget = null; showVGuide = false; showHGuide = false; render(); };
+
+            canvas.addEventListener('mousedown', startEvent);
+            window.addEventListener('mousemove', moveEvent);
+            window.addEventListener('mouseup', endEvent);
+            canvas.addEventListener('touchstart', startEvent, {passive: false});
+            window.addEventListener('touchmove', moveEvent, {passive: false});
+            window.addEventListener('touchend', endEvent);
+        }
+
+        function getPointerPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return { x: (clientX - rect.left) * (state.canvasW / rect.width), y: (clientY - rect.top) * (state.canvasH / rect.height) };
+        }
+
+        function drawImageCover(img, x, y, w, h) {
+            const r = img.width/img.height, cr = w/h;
+            let sx, sy, sw, sh;
+            if (r > cr) { sh = img.height; sw = sh * cr; sx = (img.width - sw)/2; sy = 0; }
+            else { sw = img.width; sh = sw/cr; sx = 0; sy = (img.height - sh)/2; }
+            ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
+        }
+
+        function handleImageUpload(e) {
+            const file = e.target.files[0]; if(!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => { const img = new Image(); img.onload = () => { state.bgImage = img; render(); }; img.src = ev.target.result; };
+            reader.readAsDataURL(file);
+        }
+
+        function handleLogoUpload(e) {
+            const file = e.target.files[0]; if(!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => { const img = new Image(); img.onload = () => { state.logoImage = img; render(); }; img.src = ev.target.result; };
+            reader.readAsDataURL(file);
+        }
+
+        function exportPin() {
+            const link = document.createElement('a');
+            link.download = `siva-design-${Date.now()}.png`;
+            link.href = canvas.toDataURL('image/png', 1.0);
+            link.click();
+        }
+    
+        window.addEventListener('resize',()=>render());
+</script>
+</body>
+</html>
